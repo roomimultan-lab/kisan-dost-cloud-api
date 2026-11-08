@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: kisan-dost-cloud-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_BUSINESS_ACCOUNT_ID
+        sync: false
+      - key: APP_SECRET
+        sync: false
+      - key: VERIFY_TOKEN
+        sync: false
+      - key: ADMIN_KEY
+        sync: false
+      - key: OWNER_WHATSAPP_NUMBER
+        sync: false
+    healthCheckPath: /health
