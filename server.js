@@ -30,7 +30,11 @@ const MOCK_MODE = !WHATSAPP_TOKEN || WHATSAPP_TOKEN === 'MOCK' || !PHONE_NUMBER_
 const GRAPH_VERSION = 'v21.0';
 
 // ---------- Simple JSON database ----------
-const DB_PATH = path.join(__dirname, 'db.json');
+// On Vercel the code folder is read-only, so use /tmp there.
+// On Render / Railway / a normal server, use the local db.json.
+const DB_PATH = process.env.VERCEL
+  ? path.join('/tmp', 'kisan-dost-db.json')
+  : path.join(__dirname, 'db.json');
 
 function defaultDb() {
   return { farmers: [], sessions: {}, sent_log: [] };
@@ -52,10 +56,15 @@ function loadDb() {
 }
 
 function saveDb(db) {
-  // Write to a temp file then rename, so a crash does not corrupt db.json
-  const tmp = DB_PATH + '.tmp';
-  fs.writeFileSync(tmp, JSON.stringify(db, null, 2), 'utf8');
-  fs.renameSync(tmp, DB_PATH);
+  // Write to a temp file then rename, so a crash does not corrupt db.json.
+  // On a read-only host, keep the data in memory instead of crashing.
+  try {
+    const tmp = DB_PATH + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(db, null, 2), 'utf8');
+    fs.renameSync(tmp, DB_PATH);
+  } catch (e) {
+    console.error('Could not save db.json, keeping data in memory:', e.message);
+  }
 }
 
 let db = loadDb();
